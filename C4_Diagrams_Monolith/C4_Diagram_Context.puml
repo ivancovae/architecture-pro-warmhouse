@@ -17,13 +17,18 @@ top to bottom direction
 
 !include <C4/C4_Container>
 
-Person(client, "WebClient", "Пользователь (Web-интерфейс)")
+Boundary(boundary, "<person>") {
+    Person(client, "WebClient", "Пользователь (Web-интерфейс)")
+}
 
-System(smarthome, "SmartHome Monolith System", "Приложение для управления датчиками в доме")
+Boundary(boundaryHouse, "<person house>") {
+    System_Ext(HomeDeviceApi, "Home Devive Temperature API", "Модуль данных о температуре")
+}
+Enterprise_Boundary("WarmHouse_Boundary", "Warm House") {
+    System(smarthome, "SmartHome Monolith System", "Приложение для управления датчиками в доме")
 
-System_Ext(HomeDeviceApi, "Home Devive Temperature API", "Модуль данных о температуре")
-
-DEV_POSTGRESQL(postgres, PostgreSQL, database, #White) #RoyalBlue
+    DEV_POSTGRESQL(postgres, "БД показаний", database, #White) #RoyalBlue
+}
 
 Rel(client, smarthome, "Отправляет REST запросы", "HTTP/JSON")
 
