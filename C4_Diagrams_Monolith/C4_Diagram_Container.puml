@@ -93,6 +93,12 @@ Rel(WarmHouseSystem.CentralServerApp, WarmHouseSystem.CentralDeviceService, "RES
 Rel(WarmHouseSystem.AdminService, WarmHouseSystem.CentralDeviceService, "REST-запрос", $techn="HTTPS/JSON", $tags="", $link="")
 Rel_Neighbor(WarmHouseSystem.AdminService, WarmHouseSystem.AdminService.Database, "", $techn="", $tags="", $link="")
 
+Rel(WarmHouseSystem.ExtSystem.KeyCloak, WarmHouse.WebApplication, "JWT-токен", $techn="", $tags="", $link="")
+Rel(WarmHouseSystem.ExtSystem.KeyCloak, WarmHouse.WebApplication, "JWT-токен", $techn="", $tags="", $link="")
+
+Rel(WarmHouseSystem.ExtSystem.KeyCloak, WarmHouseSystem.AdminService.Database, "", $techn="SQL", $tags="", $link="")
+Rel(WarmHouseSystem.ExtSystem.KeyCloak, WarmHouseSystem.AuthorizationService.Database, "", $techn="SQL", $tags="", $link="")
+
 Rel_Neighbor(WarmHouseSystem.CentralDeviceService, WarmHouseSystem.CentralDeviceService.Database, "", $techn="", $tags="", $link="")
 Rel(WarmHouseSystem.CentralDeviceService, WarmHouseSystem.ControlDeviceService, "REST-запрос", $techn="HTTPS/JSON", $tags="", $link="")
 Rel(WarmHouseSystem.ControlDeviceService, HouseUser.ControlSystem, "REST-запрос", $techn="HTTPS/JSON", $tags="", $link="")

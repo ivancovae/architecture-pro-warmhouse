@@ -1,0 +1,52 @@
+@startuml C4_Component_Diagram
+
+skinparam defaultTextAlignment center
+
+set separator none
+
+title Warm House Context Diagram - Admin Service - Components
+
+top to bottom direction
+
+!include <C4/C4_Component>
+
+!$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
+!include $ICONURL/common.puml
+!include $ICONURL/devicons/dotnet.puml
+!include $ICONURL/devicons2/csharp.puml
+
+!include $ICONURL/devicons/postgresql.puml
+!include $ICONURL/font-awesome/server.puml
+!include $ICONURL/font-awesome-5/database.puml
+
+System_Boundary("WarmHouseSystem_boundary", "Warm House System") {
+    Container_Ext(WarmHouseSystem.CentralServerApp, "Central server application", $techn="dotnet, csharp", $descr="Сервер приложения", $tags="", $link="", $sprite="dotnet")
+    System_Ext(WarmHouseSystem.ExtSystem.KeyCloak, "KeyCloak", $descr="Система авторизации и аутонтификации пользователей")
+
+    SystemQueue_Ext(WarmHouseSystem.ExtSystem.Kafka, "Kafka", $descr="Брокер сообщений", $tags="", $link="")
+
+    DEV_POSTGRESQL(WarmHouseSystem.AdminService.Database, "БД Администрирования и управления", database, #White) #RoyalBlue
+    Container_Ext(WarmHouseSystem.CentralDeviceService, "Central device service", $techn="dotnet, csharp", $descr="Сервис Авторизации в системе", $sprite="dotnet")       
+        
+    Container_Boundary("WarmHouseSystem.AdminService_boundary", "Admin Service", $tags="") {
+        Component(WarmHouseSystem.AdminService.AdminController, "Admin Controller Base", $techn="dotnet, csharp(ControllerBase)", $descr="Контроллер для добавления, изменения, удаления администраторов и функций администратора", $tags="", $link="", $sprite="dotnet")
+        Component(WarmHouseSystem.AdminService.AdminComponent, "Admin component", $techn="dotnet, csharp(IComponent)", $descr="Компонент администратора", $tags="", $link="", $sprite="dotnet")
+        Component(WarmHouseSystem.AdminService.AdminRepository, "Admin Repository", $techn="dotnet, csharp(IRepository)", $descr="CRUD слой репозитория связи с БД", $tags="", $link="", $sprite="dotnet")
+
+        Component(WarmHouseSystem.AdminService.KafkaProducer, "Kafka(Producer)", $techn="dotnet, csharp, kafka(IKafkaProducerService)", $descr="Сервис работы с Kafka", $tags="", $link="", $sprite="dotnet")
+        
+    }
+}
+
+Rel(WarmHouseSystem.CentralServerApp, WarmHouseSystem.AdminService.AdminController, "REST-запрос", $techn="HTTPS/JSON", $tags="", $link="")
+Rel(WarmHouseSystem.AdminService.AdminController, WarmHouseSystem.AdminService.AdminComponent, "", $techn="", $tags="", $link="")
+Rel(WarmHouseSystem.AdminService.AdminRepository, WarmHouseSystem.AdminService.Database, "Чтение/запись", $techn="SQL", $tags="", $link="")
+Rel(WarmHouseSystem.AdminService.AdminComponent, WarmHouseSystem.AdminService.KafkaProducer, "", $techn="", $tags="", $link="")
+Rel(WarmHouseSystem.AdminService.AdminComponent, WarmHouseSystem.AdminService.AdminRepository, "Управление Администраторами", $techn="", $tags="", $link="")
+Rel(WarmHouseSystem.AdminService.KafkaProducer, WarmHouseSystem.ExtSystem.Kafka, "Отправка в топик данных", $techn="dotnet, csharp", $tags="", $link="")
+
+Rel(WarmHouseSystem.ExtSystem.KeyCloak, WarmHouseSystem.AdminService.Database, "", $techn="SQL", $tags="", $link="")
+
+Rel(WarmHouseSystem.AdminService.AdminComponent, WarmHouseSystem.CentralDeviceService, "REST-запрос", $techn="HTTPS/JSON", $tags="", $link="")
+
+@enduml

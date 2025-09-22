@@ -1,0 +1,46 @@
+@startuml C4_Component_Diagram
+
+skinparam defaultTextAlignment center
+
+set separator none
+
+title Warm House Context Diagram - Authorization Service - Components
+
+top to bottom direction
+
+!include <C4/C4_Component>
+
+!$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
+!include $ICONURL/common.puml
+!include $ICONURL/devicons/dotnet.puml
+!include $ICONURL/devicons2/csharp.puml
+
+!include $ICONURL/devicons/postgresql.puml
+!include $ICONURL/font-awesome/server.puml
+!include $ICONURL/font-awesome-5/database.puml
+
+System_Boundary("WarmHouseSystem_boundary", "Warm House System") {
+    Container_Ext(WarmHouseSystem.CentralServerApp, "Central server application", $techn="dotnet, csharp", $descr="Сервер приложения", $tags="", $link="", $sprite="dotnet")
+    
+    System_Ext(WarmHouseSystem.ExtSystem.KeyCloak, "KeyCloak", $descr="Система авторизации и аутонтификации пользователей")
+    SystemQueue_Ext(WarmHouseSystem.ExtSystem.Kafka, "Kafka", $descr="Брокер сообщений", $tags="", $link="")
+    DEV_POSTGRESQL(WarmHouseSystem.AuthorizationService.Database, "БД пользователей системы", database, #White) #RoyalBlue
+
+    Container_Boundary("WarmHouseSystem.AuthorizationService_boundary", "Authorization Service", $tags="") {
+        Component(WarmHouseSystem.AuthorizationService.UserController, "User controller", $techn="dotnet, csharp(ControllerBase)", $descr="Контроллер управления данными о пользователе (добавление, редактирования информации, удаления)", $tags="", $link="", $sprite="dotnet")
+        Component(WarmHouseSystem.AuthorizationService.UserTaggingComponent, "User tagging component", $techn="dotnet, csharp", $descr="Компонент пометки данных о пользователе", $tags="", $link="", $sprite="dotnet")
+        Component(WarmHouseSystem.AuthorizationService.UsersRepository, "Users Repository", $techn="dotnet, csharp(IRepository)", $descr="CRUD слой репозитория связи с БД", $tags="", $link="", $sprite="dotnet")
+    }
+}
+
+Rel(WarmHouseSystem.CentralServerApp, WarmHouseSystem.AuthorizationService.UserController, "", $techn="", $tags="", $link="")
+Rel(WarmHouseSystem.AuthorizationService.UserController, WarmHouseSystem.AuthorizationService.UsersRepository, "", $techn="", $tags="", $link="")
+Rel(WarmHouseSystem.AuthorizationService.UsersRepository, WarmHouseSystem.AuthorizationService.Database, "Чтение/Запись", $techn="SQL", $tags="", $link="")
+
+Rel(WarmHouseSystem.ExtSystem.KeyCloak, WarmHouseSystem.AuthorizationService.Database, "", $techn="SQL", $tags="", $link="")
+
+Rel(WarmHouseSystem.ExtSystem.Kafka, WarmHouseSystem.AuthorizationService.UserTaggingComponent, "Сообщение без пометки", $techn="Kafka streams", $tags="", $link="")
+Rel(WarmHouseSystem.AuthorizationService.UserTaggingComponent, WarmHouseSystem.ExtSystem.Kafka, "Сообщение с пометкой", $techn="Kafka streams", $tags="", $link="")
+Rel(WarmHouseSystem.AuthorizationService.UserTaggingComponent, WarmHouseSystem.AuthorizationService.UsersRepository, "", $techn="", $tags="", $link="")
+
+@enduml
