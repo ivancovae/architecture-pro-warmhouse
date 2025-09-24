@@ -139,6 +139,7 @@ interface ICommandsRepository {
 ICommandsRepository ..> Command: "Работает с"
 
 struct TelemetryDto {
+  +id: String
   +deviceId: String
   +name: String
   +data: String
