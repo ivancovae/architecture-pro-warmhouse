@@ -13,6 +13,6 @@ services:
     ports:
       - "5001:8080"
     volumes:
-      - ./swagger.yml:/swagger.yml
+      - ./warmHouse.yml:/warmHouse.yml
     environment:
-      SWAGGER_JSON: /swagger.yml
+      SWAGGER_JSON: /warmHouse.yml
