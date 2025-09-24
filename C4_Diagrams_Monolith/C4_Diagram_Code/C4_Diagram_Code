@@ -14,13 +14,17 @@ struct CommandType {
 
 struct Location {
   +id: String
+  +locationType: String
   +name: String
+  +room: String
 }
 
 struct Device {
   +id: String
   +name: String
   +typeId: String
+  +status: Boolean
+  +serial_number: String
   +locationId: String
 }
 
@@ -35,7 +39,8 @@ struct DeviceDto {
   +id: String
   +name: String
   +typeId: String
-  +isAlive: Boolean
+  +status: Boolean
+  +serial_number: String
   +locationId: String
   +commands: CommandDto[]
 }
@@ -94,7 +99,7 @@ IDevicesController --> IDevicesService: "Вызывет"
 interface IDevicesService {
   -devicesRepository: IDevicesRepository
   -commandsRepository: ICommandsRepository
-  
+
   -translatorDevices: ITranslator<Device, DeviceDto>
   -translatorCommands: ITranslator<Command, CommandDto>
   

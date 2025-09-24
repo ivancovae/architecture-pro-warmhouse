@@ -1,0 +1,79 @@
+@startuml ER_Diagram_Online_Store
+
+
+entity "User" as user {
+  + id [PK]
+  --
+  * login
+  * password
+
+  * fio
+  * phone
+  * email
+  * push_token
+}
+
+entity "Location" as location {
+  + id [PK]
+  # user_id [FK]
+  -- 
+  * name
+  * location_type
+  * room
+}
+
+user ||--{ location: "1..*"
+
+entity "Device" as device {
+  + id [PK]
+  # location_id [FK]
+  # type_id
+  --
+  * name
+  * status
+  * created_at
+  * serial_number
+}
+
+location ||--{ device: "1..*"
+
+entity "DeviceType" as device_type {
+  + id [PK]
+  # device_id [FK]
+  --
+  * name
+  * type
+}
+device ||--{ device_type: "1..1"
+
+entity "TelemetryData" as telemetry {
+  + id [PK]
+  # device_id [FK]
+  --
+  * name
+  * data
+  * date_time
+}
+
+device ||--o{ telemetry: "1..*"
+
+entity "Command" as command {
+  + id [PK]
+  # device_id [FK]
+  # type_id
+  --
+  * data
+}
+
+device ||-o{ command: "1..*"
+
+entity "CommandType" as command_type {
+  + id [PK]
+  # command_id [FK]
+  --
+  * name
+  * type
+}
+command ||--{ command_type: "1..1"
+
+@enduml
