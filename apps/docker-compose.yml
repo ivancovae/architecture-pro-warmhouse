@@ -4,6 +4,7 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: smarthome-postgres
+    hostname: postgres
     ports:
       - "5432:5432"
     environment:
@@ -12,29 +13,30 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: smarthome
-    
-    volumes:
-      - ./postgres_data:/var/lib/postgresql/data
-      - ./smart_home/init.sql:/docker-entrypoint-initdb.d/init.sql
-    
+      PGDATA: /data/postgres
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
       timeout: 5s
       retries: 5
 
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+      - ./smart_home/init.sql:/docker-entrypoint-initdb.d/init.sql
+
     networks:
       - smarthome-network
 
   temperature-api:
+      container_name: temperature-api
+      hostname: temperature-api
       build:
-        context: temperature-api
+        context: ./temperature-api
         dockerfile: Dockerfile
 
       restart: unless-stopped
       ports:
         - "8081:8081"
-
       networks:
         - smarthome-network
   app:
