@@ -33,6 +33,9 @@ services:
       build:
         context: ./temperature-api
         dockerfile: Dockerfile
+      
+      environment:
+        - SERVER_PORT=8081
 
       restart: unless-stopped
       ports:

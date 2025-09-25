@@ -12,4 +12,6 @@ FROM mcr.microsoft.com/dotnet/aspnet:5.0
 WORKDIR /app
 COPY --from=build /app .
 
+EXPOSE ${SERVER_PORT}
+
 ENTRYPOINT [ "dotnet", "temperature-api.dll" ]
