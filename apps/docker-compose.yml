@@ -42,6 +42,37 @@ services:
         - "8081:8081"
       networks:
         - smarthome-network
+
+  control-api:
+    container_name: control-api
+    hostname: control-api
+    build:
+        context: ./control-api
+        dockerfile: Dockerfile
+    environment:
+      - SERVER_PORT=8084
+
+    restart: unless-stopped
+    ports:
+      - "8084:8084"
+    networks:
+      - smarthome-network
+
+  telemetry-api:
+    container_name: telemetry-api
+    hostname: telemetry-api
+    build:
+        context: ./telemetry-api
+        dockerfile: Dockerfile
+    environment:
+      - SERVER_PORT=8083
+      - TEMPERATURE_API_URL=http://temperature-api:8081
+
+    restart: unless-stopped
+    ports:
+      - "8083:8083"
+    networks:
+      - smarthome-network
   app:
     build:
       context: ./smart_home
