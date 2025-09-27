@@ -10,4 +10,4 @@ COPY config.env .
 
 EXPOSE ${SERVER_PORT}
 
-CMD uvicorn main:app "--host" "0.0.0.0" "--port" ${SERVER_PORT} "--env-file" "config.env"
+CMD uvicorn main:app "--host" "0.0.0.0" "--port" ${SERVER_PORT} "--env-file" "/app/config.env"

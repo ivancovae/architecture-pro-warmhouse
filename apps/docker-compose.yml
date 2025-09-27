@@ -66,7 +66,7 @@ services:
         dockerfile: Dockerfile
     environment:
       - SERVER_PORT=8083
-      - TEMPERATURE_API_URL=http://temperature-api:8081
+      - TEMPERATURE_API_URL=http://smart_home:8080
 
     restart: unless-stopped
     ports:
@@ -74,6 +74,7 @@ services:
     networks:
       - smarthome-network
   app:
+    hostname: smart_home
     build:
       context: ./smart_home
       dockerfile: Dockerfile
