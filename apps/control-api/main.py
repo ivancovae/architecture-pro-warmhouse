@@ -51,13 +51,13 @@ def get_command(id, command):
     print(status)
     json_data["value"] = 0
     
-    url = f"{smarthomeApi}/api/v1/sensors/{id}/value?status={status}"
+    url = f"{smarthomeApi}/api/v1/sensors/{id}/value?status=\"{status}\""
     print(f"url={url}")
     try:
         print("before url")
-        responsePatch = requests.patch(url, data={"value": 0.0, "status": status}, verify=False)
+        dataPatch = {"value": 0.0, "status": status}
+        responsePatch = requests.patch(url, dataPatch)
         print("after url")
-        print(responsePatch)
 
     except requests.exceptions.RequestException as e:
         error = str(e)
