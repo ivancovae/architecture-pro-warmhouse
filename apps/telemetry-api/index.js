@@ -2,8 +2,6 @@ const express = require('express');
 const process = require('node:process');
 const http = require('http');
 
-const libDb = require('./dbManager.js');
-
 const app = express();
 const router = express.Router();
 
@@ -14,14 +12,13 @@ const port = process.argv[2];
 TEMPERATURE_API_URL = process.argv[3];
 console.log("TEMPERATURE_API_URL="+TEMPERATURE_API_URL);
 
-const db = new libDb.dbManager();
-
 router.use((req,res,next) => {
   console.log('/' + req.method);
   next();
 });
 
 const needSended = [];
+global.Sensors = {};
 
 router.get(`/api/device/:id/start`, (req,res) => {
   const id = req.params.id;
@@ -29,6 +26,7 @@ router.get(`/api/device/:id/start`, (req,res) => {
     needSended.push(id);
   }
   console.log('id=' + id);
+  Sensors[id] = []
   
   console.log('start=' + id);
   res.send('');
@@ -49,11 +47,14 @@ router.get(`/api/device/:id/average`, (req,res) =>{
   const id = req.params.id;
   console.log('id=' + id);
 
-  let jsonData = JSON.stringify(db.getSensorById(id), null, 4);  
-  console.log(jsonData);
-  
-  console.log('averange=' + id);
-  res.send('');
+  const values = Sensors[id];
+  let result = 0;
+  for (let i = 0; i < values.length; i++) {
+    result += values[i];
+  }
+  let average = result/values.length;
+  console.log('averange=' + average);
+  res.send(JSON.stringify({average: average}));
 });
 
 router.get('/', (req,res) => {
@@ -62,31 +63,42 @@ router.get('/', (req,res) => {
 
 app.use('/', router);
 
-app.listen(port, () => {
-  db.initialize();
+const updateValues = async (el) => {
+  const url = `${TEMPERATURE_API_URL}/api/v1/sensors/${el}`;
+  console.log(url);
 
+  var req = http.get(url, (res) => {
+    console.log('STATUS: ' + res.statusCode);
+    let output = '';
+    res.setEncoding('utf8');
+
+    res.on('data', function (chunk) {
+      output += chunk;
+    });
+
+    res.on('end', () => {
+      try {
+        let data = JSON.parse(output);
+        Sensors[el].push(data.value)
+      }
+      catch (err) {
+        console.error('end', err);
+      }
+    });
+
+  });
+  req.on('error', function(e) {
+    console.log('ERROR: ' + e.message);
+  });
+  req.end();
+}
+
+app.listen(port, () => {
   console.log('Listening on port 8082')
 
   setInterval(()=>{
     for(let i = 0; i < needSended.length; i++) {
-      var el = needSended[i];
-      console.log(el);
-      const url = `${TEMPERATURE_API_URL}/api/v1/sensors/${el}`;
-      console.log(url);
-      http.get(
-          url,
-          null,
-          (error, response, body) => {
-              if (!error && (response.statusCode == 200)) {
-                  console.log(body);
-                  const json = JSON.parse(body);
-
-                  db.createSensorValue({sensorId: el, value:json.value})
-              } else {
-                console.log(`=> error=${error}`);
-              }
-          }
-      );
+      updateValues(needSended[i]);
     }
   }, 1000)
 })

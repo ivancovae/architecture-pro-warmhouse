@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 
 smarthomeApi = os.getenv("SMARTHOME_APP_API_URL")
+temperatureApi = os.getenv("TEMPERATURE_API_URL")
 
 app = FastAPI()
     
@@ -20,14 +21,13 @@ def get_about():
 def get_command(id, command):
     print("id="+id)
     print("command="+command)
-    session = requests.Session()
 
     url = f"{smarthomeApi}/api/v1/sensors/{id}"
     print("url="+url)
     error = ""
     try:
         print("request before")
-        response = session.get(url, verify=False)
+        response = requests.get(url, verify=False)
         print("request after")
         response.raise_for_status()
         print(response)
@@ -37,7 +37,8 @@ def get_command(id, command):
         error = str(e)
     if (error != ""):
         print(error)
-    
+    response.close()
+
     status = "inactive"
     json_data =  json.loads("{}")
 
@@ -54,17 +55,13 @@ def get_command(id, command):
     print(f"url={url}")
     try:
         print("before url")
-        response = session.patch(url, data=None, json=json_data, verify=False)
+        responsePatch = requests.patch(url, data={"value": 0.0, "status": status}, verify=False)
         print("after url")
-        response.raise_for_status()
-        print(response)
-
-        status_code = response.status_code
-        data_response = response.json() if response.content else {}
+        print(responsePatch)
 
     except requests.exceptions.RequestException as e:
         error = str(e)
         if (error != ""):
             print(error)
-    
+    responsePatch.close()
     return HTMLResponse(content="Command sended")
