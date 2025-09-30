@@ -1,0 +1,39 @@
+@startuml C4_Context_Diagram
+
+skinparam defaultTextAlignment center
+
+set separator none
+
+title Warm House Context Diagram - Containers
+
+top to bottom direction
+
+!$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
+!include $ICONURL/common.puml
+
+!include $ICONURL/devicons/postgresql.puml
+!include $ICONURL/font-awesome/server.puml
+!include $ICONURL/font-awesome-5/database.puml
+
+!include <C4/C4_Container>
+
+Boundary(boundary, "<person>") {
+    Person(client, "WebClient", "Пользователь (Web-интерфейс)")
+}
+
+Boundary(boundaryHouse, "<person house>") {
+    System_Ext(HomeDeviceApi, "Home Devive Temperature API", "Модуль данных о температуре")
+}
+Enterprise_Boundary("WarmHouse_Boundary", "Warm House") {
+    System(smarthome, "SmartHome Monolith System", "Приложение для управления датчиками в доме")
+
+    DEV_POSTGRESQL(postgres, "БД показаний", database, #White) #RoyalBlue
+}
+
+Rel(client, smarthome, "Отправляет REST запросы", "HTTP/JSON")
+
+Rel(smarthome, postgres, "Чтение/запись данных о температуре", "SQL")
+
+Rel(smarthome, HomeDeviceApi, "Мониторинг температуры", "HTTP/JSON")
+
+@enduml

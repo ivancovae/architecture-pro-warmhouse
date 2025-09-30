@@ -1,0 +1,13 @@
+{
+  "name": "journal-telemetry",
+  "version": "1.0.0",
+  "description": "Journal-telemetry for devices",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

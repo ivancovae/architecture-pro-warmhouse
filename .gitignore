@@ -1,1 +1,8 @@
 .DS_Store
+apps/postgres_data/
+apps/temperature-api/.vs/
+apps/temperature-api/src/.vs/
+apps/temperature-api/src/obj/Debug/net5.0/temperature-api.GeneratedMSBuildEditorConfig.editorconfig
+apps/temperature-api/src/bin/Debug/
+apps/temperature-api/src/obj/
+apps/telemetry-api/node_modules/

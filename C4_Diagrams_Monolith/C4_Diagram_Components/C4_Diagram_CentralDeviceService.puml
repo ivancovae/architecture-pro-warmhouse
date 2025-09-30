@@ -1,0 +1,60 @@
+@startuml C4_Component_Diagram
+
+skinparam defaultTextAlignment center
+
+set separator none
+
+title Warm House Context Diagram - Central Device Service - Components
+
+top to bottom direction
+
+!include <C4/C4_Component>
+
+!$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
+!include $ICONURL/common.puml
+!include $ICONURL/devicons/dotnet.puml
+!include $ICONURL/devicons2/csharp.puml
+
+!include $ICONURL/devicons/postgresql.puml
+!include $ICONURL/font-awesome/server.puml
+!include $ICONURL/font-awesome-5/database.puml
+
+System_Boundary("WarmHouseSystem_boundary", "Warm House System") {
+    Container_Ext(WarmHouseSystem.CentralServerApp, "Central server application", $techn="dotnet, csharp", $descr="Сервер приложения", $tags="", $link="", $sprite="dotnet")
+    Component_Ext(WarmHouseSystem.AuthorizationService, "Authorization service", $techn="dotnet, csharp", $descr="Сервис авторизации в системе", $tags="", $link="", $sprite="dotnet")
+    Container_Ext(WarmHouseSystem.ControlDeviceService, "Control device service", $techn="dotnet, csharp", $descr="Сервис управляющих устройств и реле", $sprite="dotnet")  
+    Container_Ext(WarmHouseSystem.SingleDeviceService, "Single device service", $techn="dotnet, csharp", $descr="Сервис сенсорных устройств", $sprite="dotnet")  
+    Container_Ext(WarmHouseSystem.StreamDeviceService, "Stream device service", $techn="dotnet, csharp, web-socket", $descr="Сервис потоковых устройств", $sprite="dotnet")  
+  
+    DEV_POSTGRESQL(WarmHouseSystem.CentralDeviceService.Database, "БД устройств", database, #White) #RoyalBlue
+
+    Container_Boundary("WarmHouseSystem.CentralDeviceService_boundary", "Central Device Service", $tags="") {
+        Component(WarmHouseSystem.DeviceService.DevicesController, "Devices controller", $techn="dotnet, csharp(ControllerBase)", $descr="Контроллер управления об устройствах (привязка, редактирования информации, отвязка устройств", $tags="", $link="", $sprite="dotnet")
+        Component(WarmHouseSystem.DeviceService.ControlDeviceController, "Control Device controller", $techn="dotnet, csharp(ControllerBase)", $descr="Контроллер для управления устройствами", $tags="", $link="", $sprite="dotnet")
+        Component(WarmHouseSystem.DeviceService.SingleDeviceController, "Single Device controller", $techn="dotnet, csharp(ControllerBase)", $descr="Контроллер получения данных от устройств датчиков", $tags="", $link="", $sprite="dotnet")
+        Component(WarmHouseSystem.DeviceService.StreamDeviceService, "Stream Device controller", $techn="dotnet, csharp(ControllerBase)", $descr="Контроллер получения данных от потоковых устройств", $tags="", $link="", $sprite="dotnet")
+
+        Component(WarmHouseSystem.DeviceService.DevicesRepository, "Devices Repository", $techn="dotnet, csharp(IRepository)", $descr="CRUD слой репозитория связи с БД", $tags="", $link="", $sprite="dotnet")
+    }
+}
+
+Rel(WarmHouseSystem.CentralServerApp, WarmHouseSystem.DeviceService.DevicesController, "REST-запрос", $techn="HTTPS/JSON", $tags="", $link="")
+Rel(WarmHouseSystem.CentralServerApp, WarmHouseSystem.DeviceService.ControlDeviceController, "REST-запрос", $techn="HTTPS/JSON", $tags="", $link="")
+Rel(WarmHouseSystem.CentralServerApp, WarmHouseSystem.DeviceService.SingleDeviceController, "REST-запрос", $techn="HTTPS/JSON", $tags="", $link="")
+Rel(WarmHouseSystem.CentralServerApp, WarmHouseSystem.DeviceService.StreamDeviceService, "REST-запрос", $techn="HTTPS/JSON", $tags="", $link="")
+
+Rel_R(WarmHouseSystem.DeviceService.DevicesController, WarmHouseSystem.DeviceService.DevicesRepository, "Запись и чтение данных", $techn="SQL", $tags="", $link="")
+
+Rel(WarmHouseSystem.DeviceService.ControlDeviceController, WarmHouseSystem.DeviceService.DevicesRepository, "", $techn="", $tags="", $link="")
+Rel(WarmHouseSystem.DeviceService.SingleDeviceController, WarmHouseSystem.DeviceService.DevicesRepository, "", $techn="", $tags="", $link="")
+Rel(WarmHouseSystem.DeviceService.StreamDeviceService, WarmHouseSystem.DeviceService.DevicesRepository, "", $techn="", $tags="", $link="")
+
+Rel(WarmHouseSystem.DeviceService.DevicesRepository, WarmHouseSystem.CentralDeviceService.Database, "Запись и чтение данных", $techn="SQL", $tags="", $link="")
+
+Rel(WarmHouseSystem.DeviceService.DevicesController, WarmHouseSystem.AuthorizationService, "REST-запрос (ID пользователя)", $techn="HTTPS/JSON", $tags="", $link="")
+
+Rel(WarmHouseSystem.DeviceService.ControlDeviceController, WarmHouseSystem.ControlDeviceService, "REST-запрос (ID устройства)", $techn="HTTPS/JSON", $tags="", $link="")
+Rel(WarmHouseSystem.DeviceService.SingleDeviceController, WarmHouseSystem.SingleDeviceService, "REST-запрос (ID устройства)", $techn="HTTPS/JSON", $tags="", $link="")
+Rel(WarmHouseSystem.DeviceService.StreamDeviceService, WarmHouseSystem.StreamDeviceService, "REST-запрос (ID устройства)", $techn="HTTPS/JSON", $tags="", $link="")
+
+@enduml

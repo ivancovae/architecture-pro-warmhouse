@@ -1,0 +1,209 @@
+@startuml C4_Code_Diagram
+
+struct DeviceType {
+  +id: String
+  +name: String
+  +type: String  
+}
+
+struct CommandType {
+  +id: String
+  +name: String
+  +type: String
+}
+
+struct Location {
+  +id: String
+  +locationType: String
+  +name: String
+  +room: String
+}
+
+struct Device {
+  +id: String
+  +name: String
+  +typeId: String
+  +status: Boolean
+  +serial_number: String
+  +locationId: String
+}
+
+struct Command {
+  +id: String
+  +deviceId: String
+  +commandId: String
+  +data: String
+}
+
+struct DeviceDto {
+  +id: String
+  +name: String
+  +typeId: String
+  +status: Boolean
+  +serial_number: String
+  +locationId: String
+  +commands: CommandDto[]
+}
+
+struct NewDeviceDto {
+  +name: String
+  +typeId: String
+  +locationId: String
+}
+
+struct CommandDto {
+  +id: String
+  +command: String
+  +data: String
+}
+
+
+interface IDevicesRepository {
+  +FindById(id: String): Nullable<Device>
+  +FindAllByLocationId(idLocation: String): Device[]
+  +FindAllByIds(ids: string[]): Device[]
+
+  +AddDevice(device: Device): Boolean
+  +UpdateDevice(device: Device): Boolean
+  +RemoveDeviceById(id: String): Boolean
+  +RemoveDeviceByDevice(device: Device): Boolean
+}
+
+interface IDevicesController {
+  -service: IDeviceService
+
+  +getDeviceById(id: String): DeviceDto
+  +getDevicesByIds(ids: string[]): DeviceDto[]
+  +getDevicesByLocationId(locationId: String): DeviceDto[]
+
+  +createDevice(device: DeviceDto): Boolean
+  +updateDevice(deviceo: DeviceDto): Boolean
+  +deleteDevice(id: String): Boolean
+  +deleteDevice(Device: DeviceDto): Boolean
+}
+
+
+
+Device ..> DeviceType: "Использует"
+Device ..> Location: "Использует"
+IDevicesRepository ..> Device: "Работает с"
+Command ..> CommandType: "Использует"
+DeviceDto ..> CommandDto: "Использует"
+
+
+
+IDevicesController ..> DeviceDto: "Возвращает"
+IDevicesController ..> NewDeviceDto: "Принимает"
+IDevicesController --> IDevicesService: "Вызывет"
+
+interface IDevicesService {
+  -devicesRepository: IDevicesRepository
+  -commandsRepository: ICommandsRepository
+
+  -translatorDevices: ITranslator<Device, DeviceDto>
+  -translatorCommands: ITranslator<Command, CommandDto>
+  
+  -getCommands(id: String): Command[]
+  -updateCommands(commands: Command[]): Boolean
+
+  +getDeviceById(id: String): Device
+  +getDevicesByIds(ids: String[]): Device[]
+  +getDevicesByLocationId(locationId: String): Device[]
+  
+  +create(device: Device): Boolean
+  +update(device: Device): Boolean
+  +deleteById(id: String): Boolean
+  +delete(device: Device): Boolean
+}
+
+IDevicesService --> IDevicesRepository: "Использует"
+IDevicesService --> ICommandsRepository: "Использует"
+
+interface ITranslator<T, TDto> {
+  +translateToDto(entity: T): TDto
+  +translateFromDto(entityDto: TDto): T
+}
+
+IDevicesService --> ITranslator: "Использует"
+
+interface ICommandsRepository {
+  +findById(id: String): Nullable<Command>
+  +findByDeviceId(id: String): Command[]
+  
+  +create(command: Command): Boolean
+  +update(command: Command): Boolean
+  +deleteById(id: String): Boolean
+  +delete(command: Command): Boolean
+}
+
+ICommandsRepository ..> Command: "Работает с"
+
+struct TelemetryDto {
+  +id: String
+  +deviceId: String
+  +name: String
+  +data: String
+  +dateTime: DateTime
+}
+
+ISingleDeviceController ..> TelemetryDto: "Работает с"
+
+interface ISingleDeviceController {
+  -service: ISingleDeviceService
+
+  +getDataByDeviceId(deviceId: String): TelemetryDto
+  +getDataByDevice(device: Device): TelemetryDto
+}
+
+ISingleDeviceController --> ISingleDeviceService: "Использует"
+
+interface ISingleDeviceService {
+  -service: IDevicesService
+  -httpClient: HttpClient<TelemetryDto>
+  -getDevice(deviceId: String): Device
+
+  +getDeviceData(locationId: String): TelemetryDto
+}
+
+ISingleDeviceService --> IDevicesService: "Вызывает"
+
+IStreamDeviceController ..> TelemetryDto: "Работает с"
+
+class IStreamDeviceController {
+  -service: IStreamDeviceService
+
+  +getTelemetryByDeviceId(deviceId: String): TelemetryDto
+}
+
+IStreamDeviceController --> IStreamDeviceService: "Использует"
+
+class IStreamDeviceService {
+  -service: IDevicesService
+  -httpClient: HttpClient<TelemetryDto>
+  -getDevice(deviceId: Long): Device
+
+  +getTelemetryByDeviceId(locationId: String): TelemetryDto
+}
+
+IStreamDeviceService --> IDevicesService: "Вызывает"
+
+interface IControlDeviceController {
+  -service: IControlDeviceService
+
+  +runCommand(command: String): void
+}
+
+IControlDeviceController --> IControlDeviceService: "Вызывает"
+IControlDeviceController ..> CommandDto: "Принимает"
+
+interface IControlDeviceService {
+  -commandsRepository: ICommandsRepository
+  -httpClient: HttpClient<CommandDto>
+  -getCommandById(id: String): Command
+
+  +runCommand(command: CommandDto): void
+}
+
+IControlDeviceService --> ICommandsRepository: "Использует"
+
+@enduml

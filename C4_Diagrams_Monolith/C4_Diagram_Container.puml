@@ -1,0 +1,124 @@
+@startuml C4_Container_Diagram
+
+skinparam defaultTextAlignment center
+
+set separator none
+
+title Warm House Context Diagram - Containers
+
+top to bottom direction
+
+!$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
+!include $ICONURL/common.puml
+!include $ICONURL/devicons/dotnet.puml
+!include $ICONURL/devicons2/csharp.puml
+
+!include $ICONURL/devicons/postgresql.puml
+!include $ICONURL/font-awesome/server.puml
+!include $ICONURL/font-awesome-5/database.puml
+
+!include <C4/C4_Container>
+
+Boundary(boundaryUsers, "<person>") {
+    Person(user, "Пользователь", "User")
+}
+
+Boundary(boundaryAdmins, "<person>") {
+    Person(admin, "Администратор", "Admin")
+}
+
+Boundary(boundaryHouse, "<person house>") {
+    System_Ext(HouseUser.ControlSystem, "Control system", $descr="Устройства управления", $tags="", $link="")
+    System_Ext(HouseUser.SingleDeviceSystem, "Single device system", $descr="Устройства с датчиками", $tags="", $link="")
+    System_Ext(HouseUser.StreamDeviceSystem, "Stream device system", $descr="Потоковые устройства", $tags="", $link="")
+}
+  
+Enterprise_Boundary("WarmHouse_Boundary", "Warm House") {
+    System_Boundary("WarmHouseWeb_boundary", "Warm House Web Application") {
+        Container(WarmHouse.WebApplication, "Web Application", $techn="JS, React, Node.js", $descr="WEB приложение")
+    }
+    System_Boundary("WarmHouseMobile_boundary", "Warm House Mobile Application") {
+        Container(WarmHouse.MobileApplication, "Mobile Application", $techn="Android, IOS", $descr="Мобильное приложение")
+    }
+    System_Boundary("WarmHouseSystem_boundary", "Warm House System") {
+        Container(WarmHouseSystem.AuthorizationService, "Authorization service", $techn="dotnet, csharp", $descr="Сервис Авторизации в системе", $sprite="dotnet")       
+        DEV_POSTGRESQL(WarmHouseSystem.AuthorizationService.Database, "БД пользователей системы", database, #White) #RoyalBlue
+
+        Container(WarmHouseSystem.CentralServerApp, "Central server application", $techn="dotnet, csharp", $descr="Сервер приложения", $tags="", $link="", $sprite="dotnet")
+        System_Ext(WarmHouseSystem.ExtSystem.KeyCloak, "KeyCloak", $descr="Система авторизации и аутонтификации пользователей")
+
+        Container(WarmHouseSystem.CentralDeviceService, "Central device service", $techn="dotnet, csharp", $descr="Сервис Авторизации в системе", $sprite="dotnet")       
+        DEV_POSTGRESQL(WarmHouseSystem.CentralDeviceService.Database, "БД устройств", database, #White) #RoyalBlue
+
+        Container(WarmHouseSystem.AdminService, "Admin service", $techn="dotnet, csharp", $descr="Сервис Администрирования и управления", $sprite="dotnet")       
+        DEV_POSTGRESQL(WarmHouseSystem.AdminService.Database, "БД Администрирования и управления", database, #White) #RoyalBlue
+        
+        Container(WarmHouseSystem.AdminService, "Admin service", $techn="dotnet, csharp", $descr="Сервис Администрирования и управления", $sprite="dotnet")  
+
+        Container(WarmHouseSystem.ControlDeviceService, "Control device service", $techn="dotnet, csharp", $descr="Сервис управляющих устройств и реле", $sprite="dotnet")  
+        Container(WarmHouseSystem.SingleDeviceService, "Single device service", $techn="dotnet, csharp", $descr="Сервис сенсорных устройств", $sprite="dotnet")  
+        Container(WarmHouseSystem.StreamDeviceService, "Stream device service", $techn="dotnet, csharp, web-socket", $descr="Сервис потоковых устройств", $sprite="dotnet")  
+
+        SystemQueue_Ext(WarmHouseSystem.ExtSystem.Kafka, "Kafka", $descr="Брокер сообщений", $tags="", $link="")
+
+        Container(WarmHouseSystem.MonitoringStreamService, "Monitoring stream service", $techn="dotnet, csharp", $descr="Сервис трансляции потока", $sprite="dotnet")  
+        ContainerDb(WormHouseSystem.MonitoringStreamService.Database, "Monitoring stream service database", $techn="clickhouse", $descr="БД потоковых данных устройтв", $tags="", $link="")
+
+        Container(WarmHouseSystem.NotificationSingleDeviceService, "Notification single device service", $techn="dotnet, csharp", $descr="Сервис отправки уведомлений", $sprite="dotnet")  
+    }
+} 
+
+Boundary(boundaryMobile, "<mobile system>") {
+    SystemQueue_Ext(WarmHouseSystem.ExtSystem.NotificationSMS, "Notification SMS", $descr="Сервис отправки СМС", $tags="", $link="")
+    SystemQueue_Ext(WarmHouseSystem.ExtSystem.NotificationPush, "Notification Push", $descr="Сервис отправки Push-уведомлений", $tags="", $link="")
+}
+Boundary(boundaryMail, "<mail system>") {
+    SystemQueue_Ext(WarmHouseSystem.ExtSystem.NotificationEmail, "Notification Email", $descr="Сервис отправки по почте", $tags="", $link="")
+}
+
+Rel(user, WarmHouse.WebApplication, "", $techn="", $tags="", $link="")
+Rel(user, WarmHouse.MobileApplication, "", $techn="", $tags="", $link="")
+Rel(admin, WarmHouse.WebApplication, "", $techn="", $tags="", $link="")
+
+Rel(WarmHouse.WebApplication, WarmHouseSystem.CentralServerApp, "REST-запрос", $techn="HTTPS/JSON", $tags="", $link="")
+Rel(WarmHouse.MobileApplication, WarmHouseSystem.CentralServerApp, "REST-запрос", $techn="HTTPS/JSON", $tags="", $link="")
+
+Rel_Neighbor(WarmHouseSystem.AuthorizationService, WarmHouseSystem.AuthorizationService.Database, "", $techn="", $tags="", $link="")
+Rel(WarmHouseSystem.CentralServerApp, WarmHouseSystem.AuthorizationService, "REST-запрос", $techn="HTTPS/JSON", $tags="", $link="")
+Rel(WarmHouseSystem.AuthorizationService, WarmHouseSystem.ExtSystem.KeyCloak, "", $techn="", $tags="", $link="")
+Rel(WarmHouseSystem.ExtSystem.KeyCloak, WarmHouse.WebApplication, "JWT-токен", $techn="", $tags="", $link="")
+Rel(WarmHouseSystem.ExtSystem.KeyCloak, WarmHouse.MobileApplication, "JWT-токен", $techn="", $tags="", $link="")
+Rel(WarmHouseSystem.CentralServerApp, WarmHouseSystem.AdminService, "REST-запрос", $techn="HTTPS/JSON", $tags="", $link="")
+Rel(WarmHouseSystem.CentralServerApp, WarmHouseSystem.CentralDeviceService, "REST-запрос", $techn="HTTPS/JSON", $tags="", $link="")
+Rel(WarmHouseSystem.AdminService, WarmHouseSystem.CentralDeviceService, "REST-запрос", $techn="HTTPS/JSON", $tags="", $link="")
+Rel_Neighbor(WarmHouseSystem.AdminService, WarmHouseSystem.AdminService.Database, "", $techn="", $tags="", $link="")
+
+Rel(WarmHouseSystem.ExtSystem.KeyCloak, WarmHouse.WebApplication, "JWT-токен", $techn="", $tags="", $link="")
+Rel(WarmHouseSystem.ExtSystem.KeyCloak, WarmHouse.WebApplication, "JWT-токен", $techn="", $tags="", $link="")
+
+Rel(WarmHouseSystem.ExtSystem.KeyCloak, WarmHouseSystem.AdminService.Database, "", $techn="SQL", $tags="", $link="")
+Rel(WarmHouseSystem.ExtSystem.KeyCloak, WarmHouseSystem.AuthorizationService.Database, "", $techn="SQL", $tags="", $link="")
+
+Rel_Neighbor(WarmHouseSystem.CentralDeviceService, WarmHouseSystem.CentralDeviceService.Database, "", $techn="", $tags="", $link="")
+Rel(WarmHouseSystem.CentralDeviceService, WarmHouseSystem.ControlDeviceService, "REST-запрос", $techn="HTTPS/JSON", $tags="", $link="")
+Rel(WarmHouseSystem.ControlDeviceService, HouseUser.ControlSystem, "REST-запрос", $techn="HTTPS/JSON", $tags="", $link="")
+
+Rel(WarmHouseSystem.CentralDeviceService, WarmHouseSystem.SingleDeviceService, "REST-запрос", $techn="HTTPS/JSON", $tags="", $link="")
+Rel(WarmHouseSystem.SingleDeviceService, HouseUser.SingleDeviceSystem, "REST-запрос", $techn="HTTPS/JSON", $tags="", $link="")
+
+Rel(WarmHouseSystem.CentralDeviceService, WarmHouseSystem.ExtSystem.Kafka, "", $techn="", $tags="", $link="")
+
+Rel(WarmHouseSystem.StreamDeviceService, WarmHouseSystem.ExtSystem.Kafka, "", $techn="", $tags="", $link="")
+Rel(WarmHouseSystem.StreamDeviceService, HouseUser.StreamDeviceSystem, "Отправка сообщений", $techn="web-socket", $tags="", $link="")
+Rel(WarmHouseSystem.CentralDeviceService, WarmHouseSystem.MonitoringStreamService, "", $techn="", $tags="", $link="")
+
+Rel(WarmHouseSystem.ExtSystem.Kafka, WarmHouseSystem.MonitoringStreamService, "", $techn="", $tags="", $link="")
+Rel_Neighbor(WarmHouseSystem.MonitoringStreamService, WormHouseSystem.MonitoringStreamService.Database, "", $techn="", $tags="", $link="")
+
+Rel(WarmHouseSystem.ExtSystem.Kafka, WarmHouseSystem.NotificationSingleDeviceService, "REST-запрос", $techn="HTTPS/JSON, SMPP, SMTP, IMAP", $tags="", $link="")
+
+Rel(WarmHouseSystem.NotificationSingleDeviceService, WarmHouseSystem.ExtSystem.NotificationSMS, "Отправка SMS", $techn="HTTPS/JSON, SMPP", $tags="", $link="")
+Rel(WarmHouseSystem.NotificationSingleDeviceService, WarmHouseSystem.ExtSystem.NotificationEmail, "Отправка по почте", $techn="HTTPS/JSON", $tags="", $link="")
+Rel(WarmHouseSystem.NotificationSingleDeviceService, WarmHouseSystem.ExtSystem.NotificationPush, "Активация PUSH-уведомления", $techn="HTTPS/JSON, SMTP, IMAP", $tags="", $link="")
+
+@enduml

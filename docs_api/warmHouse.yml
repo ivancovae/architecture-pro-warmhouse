@@ -1,0 +1,441 @@
+openapi: '3.0.3'
+info:
+  title: Devices API for WarmHouse
+  description: API управления устройствами Пользователя
+  version: '1.0'
+servers:
+  - url: https://localhost/v1
+
+tags:
+  - name: Device
+    description: Операции с устройствами Пользователя
+  - name: Location
+    description: Операции с устройствами по расположению
+  - name: Devices
+    description: Операции c группами пользовательских устройств
+  - name: Telemetry
+    description: Операции с данными с устройств пользователя
+  
+paths:
+  /api/Device:
+    post:
+      tags: [Device]
+      operationId: create
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewDeviceDto'
+      responses:
+        200:
+          description: "New Device activated"
+          content:
+            text/plain:
+              schema:
+                type: boolean
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDescriptionDto'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDescriptionDto'
+        500:
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDescriptionDto'
+
+  /api/Device/{id}:
+    get:
+      tags: [Device]
+      operationId: getDeviceById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: guid
+      responses:
+        200:
+          description: "New Device activated"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceDto'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDescriptionDto'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDescriptionDto'
+        500:
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDescriptionDto'
+
+    put:
+      tags: [Device]
+      operationId: update
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewDeviceDto'
+
+      responses:
+        200:
+          description: Device updated
+          content:
+            text/plain:
+              schema:
+                type: boolean
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDescriptionDto'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDescriptionDto'
+        500:
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDescriptionDto'
+
+    delete:
+      tags: [Device]
+      operationId: deleteById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Device removed
+          content:
+            text/plain:
+              schema:
+                type: boolean
+
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDescriptionDto'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDescriptionDto'
+        500:
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDescriptionDto'
+
+
+  /api/Devices:
+    get:
+      tags: [Devices]
+      operationId: getDevicesByIds
+      parameters:
+        - name: ids
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+
+      responses:
+        200:
+          description: Devices List
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeviceDto'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDescriptionDto'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDescriptionDto'
+        500:
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDescriptionDto'
+
+
+  /api/Location/{id}:
+    get:
+      tags: [Location]
+      operationId: getDevicesByLocationId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+
+      responses:
+        200:
+          description: Devices List
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeviceDto'
+
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDescriptionDto'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDescriptionDto'
+        500:
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDescriptionDto'
+
+  /api/Device/Command/{id}:
+    put:
+      tags: [Device]
+      operationId: runCommand
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+
+      responses:
+        200:
+          description: Device removed
+          content:
+            text/plain:
+              schema:
+                type: boolean
+
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDescriptionDto'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDescriptionDto'
+        500:
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDescriptionDto'
+
+
+  /api/Telemetry/{id}/device:
+    get:
+      tags: [Telemetry]
+      operationId: getTelemetryById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+
+      responses:
+        200:
+          description: Telemetry sended
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelemetryDto'
+
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDescriptionDto'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDescriptionDto'
+        500:
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDescriptionDto'
+
+components:
+  schemas:
+    DeviceDto:
+      type: object
+      required: [id, typeId, locationIds]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        typeId:
+          type: string
+        locationId:
+          type: string
+        status:
+          type: boolean
+        serial_number:
+          type: string
+        commands:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommandDto'
+
+    NewDeviceDto:
+      type: object
+      required: [name, typeId, locationId]
+      properties:
+        name:
+          type: string
+        typeId:
+          type: string
+        locationId:
+          type: string
+
+    CommandDto:
+      type: object
+      required: [id, command]
+      properties:
+        id:
+          type: string
+        command:
+          type: string
+        data:
+          type: string
+
+    TelemetryDto:
+      type: object
+      required: [deviceId, data]
+      properties:
+        id:
+          type: string
+        deviceId:
+          type: string
+        name:
+          type: string
+        data:
+          type: string
+        dateTime:
+          type: string
+
+    ErrorDescriptionDto:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          type: string
+
+    StatusResult:
+      type: object
+      required: [status]
+      properties:
+        status: 
+          type: boolean
+
+  responses:
+    200:
+      description: Success
+      content: 
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StatusResult'
+    400:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDescriptionDto'
+    404:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDescriptionDto'
+    500:
+      description: Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDescriptionDto'
+      
+    default: 
+      description: Неожиданная ошибка
+      content: 
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDescriptionDto'
