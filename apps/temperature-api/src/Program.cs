@@ -16,7 +16,7 @@ namespace temperature_api
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                    webBuilder.UseUrls("http://*:8081");
+                    webBuilder.UseUrls("http://0.0.0.0:8081");
                 });
     }
 }

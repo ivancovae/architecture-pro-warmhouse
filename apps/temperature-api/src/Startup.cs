@@ -2,8 +2,10 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Reflection.PortableExecutable;
 
@@ -32,14 +34,29 @@ namespace temperature_api
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapGet("/temperature", async (context) => {
+            var routeBuilder = new RouteBuilder(app);
+ 
+            routeBuilder.MapRoute("temperature",
+                async context => {
+                    context.Response.ContentType = "text/html; charset=utf-8";
+                    await context.Response.WriteAsync("Service get temperature");
+                });
+         
+ 
+            routeBuilder.MapRoute("temperature/{id}",
+                async context => {
+                    context.Response.ContentType = "text/html; charset=utf-8";
                     var location = context.Request.Query["location"].ToString();
                     var temperature = new Random().Next(-30, 55);
-                    await context.Response.WriteAsync($"{temperature}");
+
+                    var jResult = new JObject() {
+                        { "value", temperature }
+                    };
+
+                    await context.Response.WriteAsync($"{jResult.ToString()}");
                 });
-            });
+ 
+            app.UseRouter(routeBuilder.Build());
         }
     }
 }
